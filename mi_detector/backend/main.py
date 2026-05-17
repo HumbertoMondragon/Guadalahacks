@@ -138,6 +138,7 @@ async def detect(
                 "threat_type": threat_type,
                 "confidence": confidence,
                 "alert_sent": False,
+                "threats": result["threats"],
             }
 
         alert_id = db.create_alert(threat_type, confidence, camera_name)
@@ -158,6 +159,7 @@ async def detect(
             "alert_sent": alert_id is not None,
             "escalation": alert_logic.escalation_active,
             "inference_time_ms": result["inference_time_ms"],
+            "threats": result["threats"],
         }
     except HTTPException:
         raise
@@ -252,6 +254,7 @@ async def health() -> dict[str, Any]:
 
 
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+app.mount("/data", StaticFiles(directory=os.path.join(PROJECT_ROOT, "data")), name="data")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host=HOST, port=PORT, reload=DEBUG)

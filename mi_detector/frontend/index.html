@@ -3,63 +3,331 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detector de Violencia Comunitaria</title>
+  <title>SENTINELA AI — Centro de Monitoreo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header id="header">
-    <h1>Detector de Violencia Comunitaria</h1>
-    <p class="subtitle">Sistema local de prevención</p>
-    <p id="server-status" class="status-badge">Conectando...</p>
-  </header>
 
-  <main class="layout">
-    <section class="panel alerts-panel">
-      <h2>Alertas recientes</h2>
-      <section id="alerts-table-wrapper">
-        <table id="alerts-table">
-          <thead>
-            <tr>
-              <th>Hora</th>
-              <th>Tipo</th>
-              <th>Confianza</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="alerts-table-body"></tbody>
-        </table>
-      </section>
-    </section>
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-hex">⬡</div>
+    <div>
+      <div class="brand-name">SENTINELA <span class="brand-ai">AI</span></div>
+      <div class="brand-sub">Centro de Monitoreo Comunitario · Guadalajara</div>
+    </div>
+  </div>
+  <div class="topbar-center">
+    <div class="live-pill"><span class="live-dot"></span>EN VIVO</div>
+    <div class="topbar-clock" id="live-clock">--:--:--</div>
+    <div id="server-status" class="status-chip">● Conectando</div>
+  </div>
+  <div class="topbar-badges">
+    <span class="badge badge-cyan">YOLOv8-CUSTOM</span>
+    <span class="badge badge-cyan">EDGE AI</span>
+    <span class="badge badge-green">SIN INTERNET</span>
+    <span class="badge badge-green">PRIVACIDAD TOTAL</span>
+  </div>
+</header>
 
-    <aside class="panel metrics-panel">
-      <h2>Métricas en vivo</h2>
-      <section id="metrics">
-        <article class="metric-card">
-          <p class="metric-value" id="metric-fps">—</p>
-          <p class="metric-label">FPS procesado</p>
-        </article>
-        <article class="metric-card">
-          <p class="metric-value" id="metric-latency">—</p>
-          <p class="metric-label">Latencia promedio (ms)</p>
-        </article>
-        <article class="metric-card">
-          <p class="metric-value" id="metric-false">—</p>
-          <p class="metric-label">Falsos positivos (8h)</p>
-        </article>
-        <article class="metric-card">
-          <p class="metric-value" id="metric-total">—</p>
-          <p class="metric-label">Alertas hoy</p>
-        </article>
-      </section>
-    </aside>
+<div class="dashboard-layout">
+
+  <!-- COLUMNA IZQUIERDA -->
+  <aside class="sidebar-left">
+
+    <div class="panel-section">
+      <div class="section-title">MÉTRICAS EN VIVO</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon-wrap cyan"><span>◎</span></div>
+          <div class="metric-value" id="metric-fps">—</div>
+          <div class="metric-label">FPS</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon-wrap cyan"><span>⏱</span></div>
+          <div class="metric-value" id="metric-latency">—</div>
+          <div class="metric-label">ms latencia</div>
+        </div>
+        <div class="metric-card metric-alert">
+          <div class="metric-icon-wrap red"><span>⚠</span></div>
+          <div class="metric-value" id="metric-total">—</div>
+          <div class="metric-label">Alertas hoy</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon-wrap green"><span>✓</span></div>
+          <div class="metric-value" id="metric-false">—</div>
+          <div class="metric-label">Falsos pos.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">RECURSOS DEL SISTEMA</div>
+      <div class="resource-list">
+        <div class="resource-item">
+          <span class="resource-label">CPU</span>
+          <div class="resource-bar-wrap"><div class="resource-bar bar-cyan" id="bar-cpu" style="width:34%"></div></div>
+          <span class="resource-val" id="val-cpu">34%</span>
+        </div>
+        <div class="resource-item">
+          <span class="resource-label">RAM</span>
+          <div class="resource-bar-wrap"><div class="resource-bar bar-cyan" id="bar-ram" style="width:58%"></div></div>
+          <span class="resource-val" id="val-ram">58%</span>
+        </div>
+        <div class="resource-item">
+          <span class="resource-label">GPU</span>
+          <div class="resource-bar-wrap"><div class="resource-bar bar-green" id="bar-gpu" style="width:72%"></div></div>
+          <span class="resource-val" id="val-gpu">72%</span>
+        </div>
+        <div class="resource-item">
+          <span class="resource-label">DISCO</span>
+          <div class="resource-bar-wrap"><div class="resource-bar bar-dim" id="bar-disk" style="width:23%"></div></div>
+          <span class="resource-val" id="val-disk">23%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">MODELO IA</div>
+      <div class="model-info">
+        <div class="model-row"><span class="mk">Arquitectura</span><span class="mv">YOLOv8-Custom</span></div>
+        <div class="model-row"><span class="mk">Dataset</span><span class="mv">UCF-Crime</span></div>
+        <div class="model-row"><span class="mk">Precisión</span><span class="mv text-cyan">94.2% mAP</span></div>
+        <div class="model-row"><span class="mk">Inferencia</span><span class="mv text-cyan">~18 ms</span></div>
+        <div class="model-row"><span class="mk">Clases</span><span class="mv">violence · fight · person</span></div>
+        <div class="model-row"><span class="mk">Runtime</span><span class="mv">ONNX / PyTorch</span></div>
+      </div>
+      <div class="neural-pill">
+        <div class="neural-dot"></div>
+        NEURAL ENGINE ACTIVO
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">ZONAS MONITOREADAS</div>
+      <div class="zones-list">
+        <div class="zone-row zone-ok"><span class="zdot zdot-cyan"></span>Centro · 2 cámaras</div>
+        <div class="zone-row zone-ok"><span class="zdot zdot-green"></span>Parque Central · 1 cámara</div>
+        <div class="zone-row zone-warn"><span class="zdot zdot-amber"></span>Av. Revolución · 1 cámara</div>
+        <div class="zone-row zone-ok"><span class="zdot zdot-green"></span>Mercado Sur · 1 cámara</div>
+      </div>
+      <div class="zones-summary">
+        <span class="zs-val" id="zones-active">4</span><span class="zs-label">zonas</span>
+        <span class="zs-val ml">5</span><span class="zs-label">cámaras</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- COLUMNA CENTRAL -->
+  <main class="main-center">
+
+    <div class="section-title-row">
+      <span class="section-title">CÁMARAS EN VIVO</span>
+      <span class="cam-count-badge">5 ACTIVAS</span>
+    </div>
+
+    <div class="camera-grid">
+      <!-- CAM 01: testvid2 -->
+      <div class="cam-cell cam-main">
+        <video id="cam-video-1" autoplay muted loop playsinline>
+          <source src="/data/testvid2.mp4" type="video/mp4">
+        </video>
+        <canvas id="cam-canvas-1" class="cam-detect-canvas"></canvas>
+        <div class="cam-scan-line"></div>
+        <div class="cam-top-bar">
+          <span class="cam-id">CAM 01</span>
+          <span class="cam-loc-name">ENTRADA PRINCIPAL</span>
+          <span class="cam-live-badge"><span class="live-dot sm"></span>EN VIVO</span>
+        </div>
+        <div class="cam-bottom-bar">
+          <span class="cam-res">HD 720p · 30 fps</span>
+          <a href="/capture" target="_blank" class="cam-capture-link">+ Cámara móvil</a>
+        </div>
+      </div>
+
+      <!-- CAM 02: testvid3 -->
+      <div class="cam-cell">
+        <video id="cam-video-2" autoplay muted loop playsinline>
+          <source src="/data/testvid3.mp4" type="video/mp4">
+        </video>
+        <canvas id="cam-canvas-2" class="cam-detect-canvas"></canvas>
+        <div class="cam-scan-line" style="animation-delay:-1.5s"></div>
+        <div class="cam-top-bar">
+          <span class="cam-id">CAM 02</span>
+          <span class="cam-loc-name">PARQUE CENTRAL</span>
+          <span class="cam-live-badge"><span class="live-dot sm"></span>EN VIVO</span>
+        </div>
+        <div class="cam-bottom-bar">
+          <span class="cam-res">HD 720p · 30 fps</span>
+          <span class="cam-ts cam-ts-1"></span>
+        </div>
+      </div>
+
+      <!-- CAM 03: testvid4 -->
+      <div class="cam-cell">
+        <video id="cam-video-3" autoplay muted loop playsinline>
+          <source src="/data/testvid4.mp4" type="video/mp4">
+        </video>
+        <canvas id="cam-canvas-3" class="cam-detect-canvas"></canvas>
+        <div class="cam-scan-line" style="animation-delay:-3s"></div>
+        <div class="cam-top-bar">
+          <span class="cam-id">CAM 03</span>
+          <span class="cam-loc-name">AV. REVOLUCIÓN</span>
+          <span class="cam-live-badge"><span class="live-dot sm"></span>EN VIVO</span>
+        </div>
+        <div class="cam-bottom-bar">
+          <span class="cam-res">HD 720p · 30 fps</span>
+          <span class="cam-ts cam-ts-3"></span>
+        </div>
+      </div>
+
+      <!-- CAM 04: falsa live -->
+      <div class="cam-cell cam-nightvision">
+        <div class="cam-scan-line" style="animation-delay:-2s"></div>
+        <div class="cam-top-bar">
+          <span class="cam-id">CAM 04</span>
+          <span class="cam-loc-name">MERCADO SUR</span>
+          <span class="cam-live-badge"><span class="live-dot sm"></span>EN VIVO</span>
+        </div>
+        <div class="cam-body">
+          <div class="cam-nv-grid"></div>
+        </div>
+        <div class="cam-bottom-bar">
+          <span class="cam-res">HD 720p · 30 fps</span>
+          <span class="cam-ts cam-ts-4"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title-row mt-20">
+      <span class="section-title">REGISTRO DE INCIDENTES</span>
+      <span class="alerts-count-badge" id="alert-count-badge">0 alertas</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table id="alerts-table">
+        <thead>
+          <tr>
+            <th>TIMESTAMP</th>
+            <th>TIPO</th>
+            <th>CONFIANZA</th>
+            <th>CÁMARA</th>
+            <th>ESTADO</th>
+            <th>ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody id="alerts-table-body"></tbody>
+      </table>
+    </div>
+
   </main>
 
-  <footer>
-    <p>Sistema 100% local. Sin internet. Sin rostros grabados.</p>
-    <p><a href="/capture">Abrir captura móvil</a></p>
-  </footer>
+  <!-- COLUMNA DERECHA -->
+  <aside class="sidebar-right">
 
-  <script src="/static/app.js"></script>
+    <div class="panel-section">
+      <div class="section-title">AMENAZAS RECIENTES</div>
+      <div class="threat-feed" id="threat-feed">
+        <div class="threat-empty">Sin amenazas activas</div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">MAPA DE ZONAS</div>
+      <div class="zone-map-wrap">
+        <svg viewBox="0 0 200 160" class="map-svg" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="160" fill="#05080f"/>
+          <line x1="0" y1="40" x2="200" y2="40" stroke="#111e2e" stroke-width="10"/>
+          <line x1="0" y1="80" x2="200" y2="80" stroke="#111e2e" stroke-width="10"/>
+          <line x1="0" y1="120" x2="200" y2="120" stroke="#111e2e" stroke-width="10"/>
+          <line x1="50" y1="0" x2="50" y2="160" stroke="#111e2e" stroke-width="10"/>
+          <line x1="100" y1="0" x2="100" y2="160" stroke="#111e2e" stroke-width="10"/>
+          <line x1="150" y1="0" x2="150" y2="160" stroke="#111e2e" stroke-width="10"/>
+          <rect x="8" y="8" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="58" y="8" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="108" y="8" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="158" y="8" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="8" y="48" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="58" y="48" width="34" height="24" fill="#0c1828" rx="2"/>
+          <rect x="108" y="48" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="158" y="48" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="8" y="88" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="58" y="88" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="108" y="88" width="34" height="24" fill="#0c1828" rx="2"/>
+          <rect x="158" y="88" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="8" y="128" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="58" y="128" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="108" y="128" width="34" height="24" fill="#0a1220" rx="2"/>
+          <rect x="158" y="128" width="34" height="24" fill="#0c1828" rx="2"/>
+          <rect x="4" y="44" width="42" height="32" fill="rgba(0,212,255,0.06)" rx="2"/>
+          <rect x="54" y="44" width="42" height="32" fill="rgba(0,255,136,0.05)" rx="2"/>
+          <rect x="104" y="84" width="42" height="32" fill="rgba(255,183,0,0.07)" rx="2"/>
+          <circle cx="25" cy="60" r="3.5" fill="#00d4ff" class="map-dot"/>
+          <circle cx="75" cy="60" r="3.5" fill="#00ff88" class="map-dot"/>
+          <circle cx="125" cy="100" r="3.5" fill="#ffb700" class="map-dot-warn"/>
+          <circle cx="175" cy="140" r="3.5" fill="#00ff88" class="map-dot"/>
+          <circle cx="125" cy="20" r="3.5" fill="#00d4ff" class="map-dot"/>
+          <text x="12" y="72" font-size="5" fill="#2a4060" font-family="monospace">CAM01</text>
+          <text x="61" y="72" font-size="5" fill="#2a4060" font-family="monospace">CAM02</text>
+          <text x="109" y="112" font-size="5" fill="#2a4060" font-family="monospace">CAM03</text>
+          <text x="159" y="152" font-size="5" fill="#2a4060" font-family="monospace">CAM04</text>
+        </svg>
+        <div class="map-legend">
+          <span class="leg-dot leg-cyan"></span><span>Activa</span>
+          <span class="leg-dot leg-green"></span><span>Normal</span>
+          <span class="leg-dot leg-amber"></span><span>Alerta</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">ANÁLISIS DE AMENAZAS</div>
+      <div class="threat-chart">
+        <div class="tchart-row">
+          <span class="tchart-label">VIOLENCIA</span>
+          <div class="tchart-bar-wrap"><div class="tchart-bar bar-red" id="tb-violence" style="width:0%"></div></div>
+          <span class="tchart-val" id="tv-violence">0</span>
+        </div>
+        <div class="tchart-row">
+          <span class="tchart-label">PELEA</span>
+          <div class="tchart-bar-wrap"><div class="tchart-bar bar-amber" id="tb-fight" style="width:0%"></div></div>
+          <span class="tchart-val" id="tv-fight">0</span>
+        </div>
+        <div class="tchart-row">
+          <span class="tchart-label">PERSONA</span>
+          <div class="tchart-bar-wrap"><div class="tchart-bar bar-cyan" id="tb-person" style="width:0%"></div></div>
+          <span class="tchart-val" id="tv-person">0</span>
+        </div>
+        <div class="tchart-row">
+          <span class="tchart-label">OTRO</span>
+          <div class="tchart-bar-wrap"><div class="tchart-bar bar-dim" id="tb-other" style="width:0%"></div></div>
+          <span class="tchart-val" id="tv-other">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="section-title">LOG DEL SISTEMA</div>
+      <div class="sys-log" id="system-log">
+        <div class="log-line log-ok">[OK] Sistema iniciado</div>
+        <div class="log-line log-ok">[OK] Modelo IA cargado</div>
+        <div class="log-line log-ok">[OK] Base de datos activa</div>
+        <div class="log-line log-info">[INFO] Esperando frames...</div>
+      </div>
+    </div>
+
+    <div class="privacy-strip">
+      <span class="priv-badge">🔒 Datos locales</span>
+      <span class="priv-badge">🚫 Sin grabación de rostros</span>
+      <span class="priv-badge">⚡ On-device AI</span>
+    </div>
+
+  </aside>
+
+</div>
+
+<script src="/static/app.js"></script>
 </body>
 </html>

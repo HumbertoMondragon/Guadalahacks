@@ -129,6 +129,9 @@ class HybridDetector:
                     )
         except Exception:
             pass
+        print(f"DEBUG _run_yolo - {len(threats)} threats:")
+        for t in threats:
+            print(f"  type={t['type']} conf={t['confidence']} source={t['source']} bbox={t['bbox']}")
         return threats
 
     # ------------------------------------------------------------------
@@ -201,10 +204,11 @@ class HybridDetector:
                 combined[t]["confidence"] = round(new_conf, 3)
                 combined[t]["source"] = "hybrid"
 
-        return [
-            t for t in combined.values()
-            if t["confidence"] >= self.conf_threshold
-        ]
+        merged = [t for t in combined.values() if t["confidence"] >= self.conf_threshold]
+        print(f"DEBUG _merge_threats - {len(merged)} threats tras fusion:")
+        for t in merged:
+            print(f"  type={t['type']} conf={t['confidence']} source={t['source']} bbox={t.get('bbox')}")
+        return merged
 
     # ------------------------------------------------------------------
     # Resolución de ruta del modelo

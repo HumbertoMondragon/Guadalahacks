@@ -40,6 +40,33 @@ def send_frame(session: requests.Session, api_url: str, frame, index: int) -> No
             print(f"[FRAME {index}] HTTP {resp.status_code}: {resp.text[:120]}")
             return
         body = resp.json()
+
+        print(f"Respuesta JSON completa: {body}")
+        print(f"Threats recibidas: {body.get('threats', [])}")
+
+        for threat in body.get("threats", []):
+            bbox = threat.get("bbox")
+            print(f"  Type: {threat.get('type')}, Confidence: {threat.get('confidence')}, BBox: {bbox}")
+
+            if not bbox or len(bbox) != 4:
+                print(f"    BBox invalido, saltando...")
+                continue
+            x1, y1, x2, y2 = bbox
+            confidence = threat.get("confidence", 0)
+            threat_type = threat.get("type", "?")
+            label = f"{threat_type} {confidence*100:.0f}%"
+            h, w = small.shape[:2]
+            x1 = max(0, min(int(x1), w))
+            y1 = max(0, min(int(y1), h))
+            x2 = max(0, min(int(x2), w))
+            y2 = max(0, min(int(y2), h))
+            cv2.rectangle(small, (x1, y1), (x2, y2), (0, 255, 0), 3)
+            cv2.putText(small, label, (x1, max(y1 - 10, 20)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        cv2.imshow("Simulador", small)
+        cv2.waitKey(1)
+
         if body.get("detected"):
             print(
                 f"[FRAME {index}] DETECTION! type={body.get('threat_type')} "
@@ -101,6 +128,7 @@ def run(video_path: str, api_url: str, once: bool, max_frames: int | None) -> in
         print("\nDetenido por el usuario.")
     finally:
         cap.release()
+        cv2.destroyAllWindows()
 
     print(f"\nTotal frames procesados: {frame_index}")
     return 0
@@ -117,4 +145,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if os.name == 'nt':  # Windows
+        import matplotlib
+        matplotlib.use('TkAgg')
     sys.exit(main())
