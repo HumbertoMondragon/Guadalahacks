@@ -4,6 +4,7 @@ venv/
 .venv/
 **/.venv/
 *.pyc
+.DS_Store
 data/logs/
 # >100MB — GitHub rechaza el push; deja el archivo local, no en git
 data/testvid3.mp4
