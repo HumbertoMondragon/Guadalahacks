@@ -1,0 +1,5 @@
+models/*.pt
+data/
+__pycache__/
+.env
+venv/

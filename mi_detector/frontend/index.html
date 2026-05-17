@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detector de Violencia Comunitaria</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header id="header">
+    <h1>Detector de Violencia Comunitaria</h1>
+    <p class="subtitle">Sistema local de prevención</p>
+    <p id="server-status" class="status-badge">Conectando...</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel alerts-panel">
+      <h2>Alertas recientes</h2>
+      <section id="alerts-table-wrapper">
+        <table id="alerts-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Tipo</th>
+              <th>Confianza</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="alerts-table-body"></tbody>
+        </table>
+      </section>
+    </section>
+
+    <aside class="panel metrics-panel">
+      <h2>Métricas en vivo</h2>
+      <section id="metrics">
+        <article class="metric-card">
+          <p class="metric-value" id="metric-fps">—</p>
+          <p class="metric-label">FPS procesado</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value" id="metric-latency">—</p>
+          <p class="metric-label">Latencia promedio (ms)</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value" id="metric-false">—</p>
+          <p class="metric-label">Falsos positivos (8h)</p>
+        </article>
+        <article class="metric-card">
+          <p class="metric-value" id="metric-total">—</p>
+          <p class="metric-label">Alertas hoy</p>
+        </article>
+      </section>
+    </aside>
+  </main>
+
+  <footer>
+    <p>Sistema 100% local. Sin internet. Sin rostros grabados.</p>
+    <p><a href="/capture">Abrir captura móvil</a></p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
