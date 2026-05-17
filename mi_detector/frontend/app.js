@@ -298,16 +298,17 @@ function drawDetections(ctx, threats, frameW, frameH) {
   }
 }
 
-async function detectCamFrame(videoId, canvasId, camName) {
-  const video  = document.getElementById(videoId);
-  const canvas = document.getElementById(canvasId);
+async function detectCamFrame(cam) {
+  const video  = document.getElementById(cam.vid);
+  const canvas = document.getElementById(cam.cvs);
   if (!video || !canvas || video.readyState < 2 || video.paused) return;
 
-  // Ajusta resolución del canvas a su tamaño en pantalla
   const rect = canvas.getBoundingClientRect();
   if (rect.width === 0) return;
-  canvas.width  = rect.width;
-  canvas.height = rect.height;
+  if (canvas.width !== Math.round(rect.width) || canvas.height !== Math.round(rect.height)) {
+    canvas.width  = Math.round(rect.width);
+    canvas.height = Math.round(rect.height);
+  }
 
   const frameH = Math.round((video.videoHeight / video.videoWidth) * SEND_W) || 240;
   const tmp = document.createElement("canvas");
@@ -315,42 +316,89 @@ async function detectCamFrame(videoId, canvasId, camName) {
   tmp.height = frameH;
   tmp.getContext("2d").drawImage(video, 0, 0, SEND_W, frameH);
 
-  tmp.toBlob(async (blob) => {
-    if (!blob) return;
-    const form = new FormData();
-    form.append("frame", blob, "frame.jpg");
-    form.append("camera_name", camName);
-    try {
-      const res = await fetch(`${API_BASE}/api/detect`, { method: "POST", body: form });
-      if (!res.ok) return;
-      const data = await res.json();
-      const ctx = canvas.getContext("2d");
+  const blob = await new Promise(resolve => tmp.toBlob(resolve, "image/jpeg", 0.75));
+  if (!blob) return;
+
+  const form = new FormData();
+  form.append("frame", blob, "frame.jpg");
+  form.append("camera_name", cam.name);
+  try {
+    const res = await fetch(`${API_BASE}/api/detect`, { method: "POST", body: form });
+    if (!res.ok) return;
+    const data = await res.json();
+    const ctx = canvas.getContext("2d");
+
+    if (data.threats && data.threats.length > 0) {
+      cam.lastDetect  = Date.now();
+      cam.lastThreats = data.threats;
+      cam.lastW       = SEND_W;
+      cam.lastH       = frameH;
+      addLogEntry("log-warn", `[DETECT] ${cam.name}: ${data.threats.map(t => t.type).join(", ")}`);
+    }
+
+    const age = Date.now() - cam.lastDetect;
+    if (cam.lastThreats && age < DETECTION_LINGER_MS) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (data.threats && data.threats.length > 0) {
-        drawDetections(ctx, data.threats, SEND_W, frameH);
-        addLogEntry("log-warn", `[DETECT] ${camName}: ${data.threats.map(t => t.type).join(", ")}`);
-      }
-    } catch { /* silent */ }
-  }, "image/jpeg", 0.8);
+      drawDetections(ctx, cam.lastThreats, cam.lastW, cam.lastH);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      cam.lastThreats = null;
+    }
+  } catch { /* silent */ }
 }
 
+const DETECTION_LINGER_MS = 1000;
+
 const CAM_SOURCES = [
-  { vid: "cam-video-1", cvs: "cam-canvas-1", name: "CAM 01 · Entrada Principal" },
-  { vid: "cam-video-2", cvs: "cam-canvas-2", name: "CAM 02 · Parque Central"   },
-  { vid: "cam-video-3", cvs: "cam-canvas-3", name: "CAM 03 · Av. Revolución"   },
+  { vid: "cam-video-1", cvs: "cam-canvas-1", name: "CAM 01 · Entrada Principal", lastDetect: 0, lastThreats: null, lastW: 0, lastH: 0 },
+  { vid: "cam-video-2", cvs: "cam-canvas-2", name: "CAM 02 · Parque Central",    lastDetect: 0, lastThreats: null, lastW: 0, lastH: 0 },
+  { vid: "cam-video-3", cvs: "cam-canvas-3", name: "CAM 03 · Av. Revolución",    lastDetect: 0, lastThreats: null, lastW: 0, lastH: 0, noDetect: true },
 ];
 
+async function camDetectionLoop(cam, delayMs) {
+  if (cam.noDetect) return;
+  await new Promise(r => setTimeout(r, delayMs));
+  while (true) {
+    await detectCamFrame(cam);
+    await new Promise(r => setTimeout(r, 80));
+  }
+}
+
 function startCamDetection() {
-  CAM_SOURCES.forEach((cam, i) => {
-    // Escalonado: cada cámara empieza 600ms después para no saturar el servidor
-    setTimeout(() => {
-      setInterval(() => detectCamFrame(cam.vid, cam.cvs, cam.name), 1800);
-    }, i * 600);
-  });
+  CAM_SOURCES.forEach((cam, i) => camDetectionLoop(cam, i * 400));
 }
 
 /* ── INIT ──────────────────────────────────────────────── */
+/* ── SEQUENTIAL CAM PLAYBACK ───────────────────────────────── */
+const CAM_IDS = ["cam-video-1", "cam-video-2", "cam-video-3"];
+let activeCamIndex = 0;
+
+function playNextCam() {
+  // Pausa la cámara activa
+  const current = document.getElementById(CAM_IDS[activeCamIndex]);
+  if (current) current.pause();
+
+  // Avanza al siguiente
+  activeCamIndex = (activeCamIndex + 1) % CAM_IDS.length;
+  const next = document.getElementById(CAM_IDS[activeCamIndex]);
+  if (!next) return;
+  next.currentTime = 0;
+  next.play().catch(() => {});
+}
+
+function initSequentialPlayback() {
+  CAM_IDS.forEach((id, i) => {
+    const v = document.getElementById(id);
+    if (!v) return;
+    v.addEventListener("ended", playNextCam);
+    if (i > 0) v.pause();
+  });
+  const first = document.getElementById(CAM_IDS[0]);
+  if (first) first.play().catch(() => {});
+}
+
 window.onload = () => {
+  initSequentialPlayback();
   fetchAlerts();
   fetchMetrics();
   setInterval(fetchAlerts, 3000);

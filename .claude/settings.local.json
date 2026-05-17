@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm *)",
+      "PowerShell(git pull *)",
+      "PowerShell(git restore *)",
+      "PowerShell(Rename-Item *)",
+      "Bash(cmd.exe /c del /f /q \"C:\\\\Users\\\\humbe\\\\Guadalahacks\\\\mi_detector\\\\data\\\\logs\\\\app.log\")",
+      "Bash(echo \"exit: $?\")",
+      "PowerShell(Get-Process *)",
+      "PowerShell(git fetch *)",
+      "PowerShell(git merge *)",
+      "PowerShell(git *)",
+      "Bash(venv/Scripts/python -c ' *)",
+      "Bash(ffprobe *)",
+      "Bash(curl *)",
+      "Bash(where ffmpeg *)",
+      "Bash(venv/Scripts/python -c \"import starlette; print\\(starlette.__version__\\)\")",
+      "Bash(ipconfig)",
+      "PowerShell(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.PrefixOrigin -ne \"WellKnown\" } | Select-Object IPAddress, InterfaceAlias)"
+    ]
+  }
+}

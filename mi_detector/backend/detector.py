@@ -37,7 +37,7 @@ class HybridDetector:
     def __init__(
         self,
         model_path: str,
-        input_size: int = 640,
+        input_size: int = 320,
         conf_threshold: float = 0.85,
     ) -> None:
         self.input_size = input_size
@@ -150,7 +150,7 @@ class HybridDetector:
             bbox = _landmarks_bbox(lm, w, h)
 
             fight_conf = _estimate_fight_confidence(lm)
-            if fight_conf >= 0.60:
+            if fight_conf >= self.conf_threshold:
                 threats.append(
                     {
                         "type": "fight",
@@ -161,7 +161,7 @@ class HybridDetector:
                 )
 
             fallen_conf = _estimate_fallen_confidence(lm)
-            if fallen_conf >= 0.60:
+            if fallen_conf >= self.conf_threshold:
                 threats.append(
                     {
                         "type": "fallen",

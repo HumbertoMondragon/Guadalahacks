@@ -1,7 +1,7 @@
 # Modelo
 MODEL_PATH = "models/best.pt"
-MODEL_INPUT_SIZE = 640
-CONFIDENCE_THRESHOLD = 0.85
+MODEL_INPUT_SIZE = 320
+CONFIDENCE_THRESHOLD = 0.50
 CLASSES = {"violence": 0, "fight": 1, "person": 2}
 
 # Servidor
